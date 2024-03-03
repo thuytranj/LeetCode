@@ -11,22 +11,7 @@ struct ListNode
     ListNode *next;
     ListNode(int x) : val(x), next(NULL) {}
 };
-void insertLast(ListNode *&head, ListNode *&tail, int val)
-{
-    ListNode *p = new ListNode;
-    p->val = val;
-    p->next = NULL;
-    if (tail == NULL)
-    {
-        head = p;
-        tail = p;
-    }
-    else
-    {
-        tail->next = p;
-        tail = p;
-    }
-}
+
 bool hasCycle(ListNode *head)
 {
     ListNode *p = head;
