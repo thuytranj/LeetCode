@@ -13,43 +13,33 @@ struct TreeNode
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
-void minValue(TreeNode *root, TreeNode *&min)
+void helper(TreeNode *root, TreeNode *&maxLeft, TreeNode *minRight)
 {
     if (root == NULL)
-    {
         return;
-    }
-    minValue(root->left, min);
-    if (!min || root->val < min->val)
-        min = root;
-    minValue(root->right, min);
-}
-void maxValue(TreeNode *root, TreeNode *&max)
-{
-    if (root == NULL)
-    {
-        return;
-    }
-    maxValue(root->left, max);
-    if (!max || root->val > max->val)
-        max = root;
-    maxValue(root->right, max);
-}
-void recoverTree(TreeNode *root)
-{
-    TreeNode *maxLeft = root->left, *minRight = root->right;
-    maxValue(root->left, maxLeft);
-    minValue(root->right, minRight);
-    if (maxLeft && maxLeft->val > root->val)
+    if (root->left == NULL)
+        maxLeft = root;
+    if (root->right == NULL)
+        minRight = root;
+    helper(root->left, maxLeft, minRight);
+    if (maxLeft->val > root->val)
     {
         swap(maxLeft->val, root->val);
         return;
     }
-    if (minRight && minRight->val < root->val)
+    if (maxRight->val < root->val)
     {
-        swap(minRight->val, root->val);
+        swap(maxRight->val, root->val);
         return;
     }
+    helper(root->right, maxLeft, minRight);
+}
+void recoverTree(TreeNode *root)
+{
+    if (root == NULL)
+        return;
+    TreeNode *maxLeft, minRight;
+    helper(root, maxLeft, minRight);
 }
 int main()
 {
