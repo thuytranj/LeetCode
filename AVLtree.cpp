@@ -16,50 +16,127 @@ int getHeight(Node *root)
 }
 int getBalance(Node *root)
 {
+    if (!root)
+        return 0;
     return getHeight(root->left) - getHeight(root->right);
 }
 Node *leftRotation(Node *root)
 {
     if (!root)
         return NULL;
-    Node *child = root->right, *children = child->left;
+    Node *child = root->right;
+    Node *childLeft = child->left;
     child->left = root;
-    root->right = children;
+    root->right = childLeft;
+
     root->height = 1 + max(getHeight(root->left), getHeight(root->right));
     child->height = 1 + max(getHeight(child->left), getHeight(child->right));
+
     return child;
 }
 Node *rightRotation(Node *root)
 {
     if (!root)
         return NULL;
-    Node *child = root->left, *children = child->right;
+    Node *child = root->left;
+    Node *childRight = child->right;
     child->right = root;
-    root->left = children;
+    root->left = childRight;
+
     root->height = 1 + max(getHeight(root->left), getHeight(root->right));
     child->height = 1 + max(getHeight(child->left), getHeight(child->right));
+
     return child;
 }
-Node *insertAVL(Node *&root, int key)
+Node *insertToAVL(Node *node, int data)
+{
+    if (!node)
+        return new Node(data);
+    else if (data < node->val)
+        node->left = insertToAVL(node->left, data);
+    else if (data > node->val)
+        node->right = insertToAVL(node->right, data);
+    else
+        return node;
+
+    node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+
+    int balance = getBalance(node);
+
+    if (balance > 1 && data < node->left->val)
+        return rightRotation(node);
+
+    else if (balance < -1 && data > node->right->val)
+        return leftRotation(node);
+
+    else if (balance > 1 && data > node->left->val)
+    {
+        node->left = leftRotation(node->left);
+        return rightRotation(node);
+    }
+
+    else if (balance < -1 && data < node->right->val)
+    {
+        node->right = rightRotation(node->right);
+        return leftRotation(node);
+    }
+    else
+        return node;
+}
+Node *getMinNode(Node *root)
 {
     if (!root)
-        return new Node(key);
-    if (key < root->val)
-        root->left = insertAVL(root->left, key);
-    else if (key > root->val)
-        root->right = insertAVL(root->right, key);
+        return NULL;
+    if (!root->left)
+        return root;
+    return getMinNode(root->left);
+}
+Node *deleteNode(Node *root, int data)
+{
+    if (!root)
+        return NULL;
+    if (data < root->data)
+        root->left = deleteNode(root->left, data);
+    else if (data > root->data)
+        root->right = deleteNode(root->right, data);
     else
-        return root; // not same key in AVL tree
-
+    {
+        if (!root->left && !root->right)
+        {
+            delete root;
+            return NULL;
+        }
+        else if (!root->right)
+        {
+            Node *tmp = root->left;
+            delete root;
+            return tmp;
+        }
+        else if (!root->left)
+        {
+            Node *tmp = root->right;
+            delete root;
+            return tmp;
+        }
+        else
+        {
+            Node *tmp = getMinNode(root->right);
+            root->data = tmp->data;
+            root->right = deleteNode(root->right, tmp->data);
+        }
+    }
     root->height = 1 + max(getHeight(root->left), getHeight(root->right));
 
     int balance = getBalance(root);
 
     if (balance > 1)
     {
-        if (key < root->val) // LL case
+        int l = getBalance(root->left);
+        if (l >= 0)
+        {
             return rightRotation(root);
-        else // LR case
+        }
+        else
         {
             root->left = leftRotation(root->left);
             return rightRotation(root);
@@ -67,10 +144,13 @@ Node *insertAVL(Node *&root, int key)
     }
     else if (balance < -1)
     {
-        if (key > root->val) // RR case
+        int r = getBalance(root->right);
+        if (r <= 0)
+        {
             return leftRotation(root);
+        }
         else
-        { // RL case
+        {
             root->right = rightRotation(root->right);
             return leftRotation(root);
         }
@@ -78,7 +158,6 @@ Node *insertAVL(Node *&root, int key)
     else
         return root;
 }
-
 void bfs(Node *root)
 {
     if (!root)
@@ -104,12 +183,12 @@ void bfs(Node *root)
 int main()
 {
     Node *root = NULL;
-    root = insertAVL(root, 1);
-    root = insertAVL(root, 2);
-    root = insertAVL(root, 3);
-    root = insertAVL(root, 4);
-    root = insertAVL(root, 5);
-    root = insertAVL(root, 6);
+    root = insertToAVL(root, 1);
+    root = insertToAVL(root, 2);
+    root = insertToAVL(root, 3);
+    root = insertToAVL(root, 4);
+    root = insertToAVL(root, 5);
+    root = insertToAVL(root, 6);
 
     bfs(root);
     return 0;
