@@ -17,6 +17,7 @@
     "unordered_map": "cpp",
     "new": "cpp",
     "__node_handle": "cpp",
-    "queue": "cpp"
+    "queue": "cpp",
+    "tuple": "cpp"
   }
 }
